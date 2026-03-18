@@ -2,7 +2,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import {
   HomeIcon, UserGroupIcon, BookOpenIcon,
   ClipboardDocumentListIcon, BellIcon, ArrowRightOnRectangleIcon,
-  UserPlusIcon,
+  UserPlusIcon, ChartBarIcon,
 } from '@heroicons/react/24/outline'
 
 const nav = [
@@ -11,6 +11,7 @@ const nav = [
   { to: '/lessons',       label: 'Lessons',        icon: BookOpenIcon },
   { to: '/projects',      label: 'Projects',       icon: ClipboardDocumentListIcon },
   { to: '/registrations', label: 'Registrations',  icon: UserPlusIcon },
+  { to: '/reports',       label: 'Reports',        icon: ChartBarIcon },
 ]
 
 export default function Layout() {

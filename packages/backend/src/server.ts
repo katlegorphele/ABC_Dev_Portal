@@ -10,6 +10,8 @@ import studentRoutes      from './routes/students'
 import lessonRoutes       from './routes/lessons'
 import projectRoutes      from './routes/projects'
 import registrationRoutes from './routes/registrations'
+import reportRoutes        from './routes/reports'
+import cohortRoutes        from './routes/cohorts'
 
 const app  = express()
 const PORT = process.env.PORT || 3002
@@ -24,6 +26,8 @@ app.use('/api/students',      studentRoutes)
 app.use('/api/lessons',       lessonRoutes)
 app.use('/api/projects',      projectRoutes)
 app.use('/api/registrations', registrationRoutes)
+app.use('/api/reports',       reportRoutes)
+app.use('/api/cohorts',       cohortRoutes)
 
 app.get('/api/health', (_req, res) => res.json({
   status: 'ok',

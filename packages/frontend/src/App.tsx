@@ -8,6 +8,7 @@ import Lessons from './pages/Lessons'
 import Projects from './pages/Projects'
 import Registrations from './pages/Registrations'
 import Register from './pages/Register'
+import Reports  from './pages/Reports'
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem('abc_token')
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="lessons"                element={<Lessons />} />
           <Route path="projects"               element={<Projects />} />
           <Route path="registrations"          element={<Registrations />} />
+          <Route path="reports"               element={<Reports />} />
         </Route>
       </Routes>
     </BrowserRouter>

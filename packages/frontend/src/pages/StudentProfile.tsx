@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeftIcon, PencilIcon } from '@heroicons/react/24/outline'
 import api from '../lib/api'
+import ScoreChart from '../components/ScoreChart'
 
 function ScorePill({ label, value }: { label: string; value: number }) {
   const color = value >= 7 ? 'text-brand-400' : value >= 5 ? 'text-yellow-400' : 'text-red-400'
@@ -22,6 +23,12 @@ export default function StudentProfile() {
   const { data: student, isLoading } = useQuery({
     queryKey: ['student', id],
     queryFn: () => api.get(`/students/${id}`).then(r => r.data),
+  })
+
+  const { data: report } = useQuery({
+    queryKey: ['student-report', id],
+    queryFn: () => api.get(`/reports/student/${id}`).then(r => r.data),
+    enabled: !!id,
   })
 
   if (isLoading) return <div className="p-6 text-gray-500">Loading…</div>
@@ -112,6 +119,14 @@ export default function StudentProfile() {
                   <p className="text-xs text-brand-600 mt-0.5">Meets threshold for client projects (Tech ≥7, Security ≥7)</p>
                 </div>
               )}
+
+              {/* Score trend chart */}
+              {student.scores?.length >= 2 && (
+                <div className="pt-2">
+                  <p className="text-xs text-gray-500 mb-2">Score Trend</p>
+                  <ScoreChart scores={student.scores} />
+                </div>
+              )}
             </div>
           )}
 
@@ -139,6 +154,44 @@ export default function StudentProfile() {
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Attendance summary from report */}
+          {report && (
+            <div className="card">
+              <h3 className="font-medium text-white text-sm mb-3">Attendance & Progress</h3>
+              <div className="grid grid-cols-3 gap-3 text-center">
+                <div className="p-3 bg-gray-800/50 rounded-lg">
+                  <p className="text-xl font-bold text-white">{report.attendance?.attended ?? 0}</p>
+                  <p className="text-xs text-gray-500">Lessons Attended</p>
+                </div>
+                <div className="p-3 bg-gray-800/50 rounded-lg">
+                  <p className={`text-xl font-bold ${(report.attendance?.rate ?? 0) >= 80 ? 'text-brand-400' : (report.attendance?.rate ?? 0) >= 60 ? 'text-yellow-400' : 'text-red-400'}`}>
+                    {report.attendance?.rate ?? 0}%
+                  </p>
+                  <p className="text-xs text-gray-500">Attendance Rate</p>
+                </div>
+                <div className="p-3 bg-gray-800/50 rounded-lg">
+                  <p className="text-xl font-bold text-white">{report.submissions?.length ?? 0}</p>
+                  <p className="text-xs text-gray-500">Projects Done</p>
+                </div>
+              </div>
+              {report.improvement && (
+                <div className="mt-3 pt-3 border-t border-gray-800">
+                  <p className="text-xs text-gray-500 mb-2">Improvement Since Start</p>
+                  <div className="grid grid-cols-4 gap-2">
+                    {Object.entries(report.improvement).map(([k, v]: any) => (
+                      <div key={k} className="text-center">
+                        <p className={`text-sm font-bold ${v > 0 ? 'text-brand-400' : v < 0 ? 'text-red-400' : 'text-gray-500'}`}>
+                          {v > 0 ? '+' : ''}{v}
+                        </p>
+                        <p className="text-xs text-gray-600 capitalize">{k.replace('_',' ')}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
