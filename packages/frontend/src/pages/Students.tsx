@@ -106,9 +106,10 @@ export default function Students() {
             </thead>
             <tbody className="divide-y divide-gray-800">
               {filtered.map((s: any) => {
+                const studentId = s._id ?? s.id
                 const sc = s.latest_scores ? JSON.parse(s.latest_scores) : null
                 return (
-                  <tr key={s.id} className="hover:bg-gray-800/30 transition-colors">
+                  <tr key={studentId} className="hover:bg-gray-800/30 transition-colors">
                     <td className="px-4 py-3">
                       <p className="font-medium text-white">{s.name}</p>
                       <p className="text-xs text-gray-500">{s.handle} · {s.discord_handle}</p>
@@ -135,7 +136,7 @@ export default function Students() {
                       {new Date(s.joined_at).toLocaleDateString('en-ZA')}
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <Link to={`/students/${s.id}`} className="btn-secondary text-xs py-1.5 px-3">
+                      <Link to={`/students/${studentId}`} className="btn-secondary text-xs py-1.5 px-3">
                         View
                       </Link>
                     </td>

@@ -170,7 +170,7 @@ export default function Reports() {
             {/* Inactive alerts */}
             {weekly.alerts.inactive_students?.length > 0 && (
               <div className="card border-red-900/40">
-                <h2 className="font-semibold text-red-400 mb-3">⚠️ Inactive Students (>5 days)</h2>
+                <h2 className="font-semibold text-red-400 mb-3">⚠️ Inactive Students ({'>'}5 days)</h2>
                 <div className="space-y-2">
                   {weekly.alerts.inactive_students.map((s: any) => (
                     <div key={s._id} className="flex items-center justify-between p-3 bg-red-900/10 rounded-lg border border-red-900/20">

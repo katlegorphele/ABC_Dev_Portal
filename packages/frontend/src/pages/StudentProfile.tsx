@@ -19,10 +19,12 @@ export default function StudentProfile() {
   const { id } = useParams<{ id: string }>()
   const qc = useQueryClient()
   const [showScore, setShowScore] = useState(false)
+  const [showEdit, setShowEdit] = useState(false)
 
   const { data: student, isLoading } = useQuery({
     queryKey: ['student', id],
     queryFn: () => api.get(`/students/${id}`).then(r => r.data),
+    enabled: !!id,
   })
 
   const { data: report } = useQuery({
@@ -34,8 +36,12 @@ export default function StudentProfile() {
   if (isLoading) return <div className="p-6 text-gray-500">Loading…</div>
   if (!student)  return <div className="p-6 text-red-400">Student not found</div>
 
-  const latest = student.scores?.[0]
-  const langs  = JSON.parse(student.languages || '[]')
+  const latest = student.scores?.[student.scores.length - 1]
+  const langs = Array.isArray(student.languages)
+    ? student.languages
+    : typeof student.languages === 'string' && student.languages.trim()
+      ? JSON.parse(student.languages)
+      : []
 
   return (
     <div className="p-6 space-y-6 max-w-4xl">
@@ -53,9 +59,14 @@ export default function StudentProfile() {
           </div>
           <p className="text-gray-500 text-sm mt-0.5">{student.handle} · {student.discord_handle} · {student.country}</p>
         </div>
-        <button onClick={() => setShowScore(true)} className="btn-primary">
-          <PencilIcon className="h-4 w-4" /> Update Scores
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={() => setShowEdit(true)} className="btn-secondary">
+            <PencilIcon className="h-4 w-4" /> Edit Details
+          </button>
+          <button onClick={() => setShowScore(true)} className="btn-primary">
+            <PencilIcon className="h-4 w-4" /> Update Scores
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -222,6 +233,125 @@ export default function StudentProfile() {
           onClose={() => { setShowScore(false); qc.invalidateQueries({ queryKey: ['student', id] }) }}
         />
       )}
+
+      {showEdit && (
+        <EditStudentModal
+          student={student}
+          onClose={() => {
+            setShowEdit(false)
+            qc.invalidateQueries({ queryKey: ['student', id] })
+          }}
+        />
+      )}
+    </div>
+  )
+}
+
+function EditStudentModal({ student, onClose }: any) {
+  const qc = useQueryClient()
+  const [form, setForm] = useState({
+    name: student.name ?? '',
+    handle: student.handle ?? '',
+    email: student.email ?? '',
+    discord_handle: student.discord_handle ?? '',
+    github_username: student.github_username ?? '',
+    country: student.country ?? '',
+    goals: student.goals ?? '',
+    hours_per_week: student.hours_per_week ?? 10,
+    level: student.level ?? 'L1',
+    status: student.status ?? 'active',
+  })
+  const [error, setError] = useState('')
+
+  const mutation = useMutation({
+    mutationFn: (data: any) => api.patch(`/students/${student._id ?? student.id}`, data),
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: ['student', student._id ?? student.id] })
+      onClose()
+    },
+    onError: (e: any) => setError(e.response?.data?.error || 'Error updating student'),
+  })
+
+  function set<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
+    setForm(current => ({ ...current, [key]: value }))
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+      <div className="bg-gray-900 border border-gray-800 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-5 border-b border-gray-800">
+          <h2 className="font-semibold text-white">Edit Student</h2>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-300 text-xl leading-none">×</button>
+        </div>
+        <div className="p-5 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[['name', 'Full Name'], ['handle', 'Handle'], ['email', 'Email'], ['discord_handle', 'Discord'], ['github_username', 'GitHub'], ['country', 'Country']].map(([key, label]) => (
+              <div key={key}>
+                <label className="label">{label}</label>
+                <input
+                  className="input"
+                  value={(form as any)[key]}
+                  onChange={e => set(key as keyof typeof form, e.target.value as any)}
+                />
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="label">Hours / Week</label>
+              <input
+                type="number"
+                min={1}
+                max={80}
+                className="input"
+                value={form.hours_per_week}
+                onChange={e => set('hours_per_week', Number(e.target.value))}
+              />
+            </div>
+            <div>
+              <label className="label">Level</label>
+              <select className="input" value={form.level} onChange={e => set('level', e.target.value as any)}>
+                <option value="L1">L1</option>
+                <option value="L2">L2</option>
+                <option value="L3">L3</option>
+                <option value="L4">L4</option>
+              </select>
+            </div>
+            <div>
+              <label className="label">Status</label>
+              <select className="input" value={form.status} onChange={e => set('status', e.target.value as any)}>
+                <option value="active">Active</option>
+                <option value="pending">Pending</option>
+                <option value="inactive">Inactive</option>
+                <option value="alumni">Alumni</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="label">Goals</label>
+            <textarea
+              className="input h-24 resize-none"
+              value={form.goals}
+              onChange={e => set('goals', e.target.value)}
+            />
+          </div>
+
+          {error && <p className="text-sm text-red-400">{error}</p>}
+
+          <div className="flex gap-3 pt-2">
+            <button onClick={onClose} className="btn-secondary flex-1 justify-center">Cancel</button>
+            <button
+              onClick={() => mutation.mutate(form)}
+              disabled={mutation.isPending}
+              className="btn-primary flex-1 justify-center"
+            >
+              {mutation.isPending ? 'Saving…' : 'Save Changes'}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

@@ -111,7 +111,7 @@ router.post('/', requireAuth, async (req: AuthRequest, res: Response) => {
 
 // ─── PATCH /students/:id ──────────────────────────────────────────────────────
 router.patch('/:id', requireAuth, async (req: AuthRequest, res: Response) => {
-  const allowed = ['name','handle','discord_handle','github_username','country',
+  const allowed = ['name','handle','email','discord_handle','github_username','country',
     'languages','blockchain_experience','goals','hours_per_week','level',
     'status','cohort','notes','last_active']
 
