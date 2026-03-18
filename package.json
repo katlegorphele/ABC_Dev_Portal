@@ -1,0 +1,14 @@
+{
+  "name": "abc-portal",
+  "version": "1.0.0",
+  "description": "Africa's Blockchain Club — Dev Training Portal",
+  "private": true,
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "start": "turbo run start"
+  },
+  "devDependencies": {
+    "turbo": "^1.13.0"
+  }
+}
