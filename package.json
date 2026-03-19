@@ -13,5 +13,8 @@
   },
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild"]
+  }
 }
